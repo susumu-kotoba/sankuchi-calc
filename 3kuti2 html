@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三口の計算アプリ（ローカル版）</title>
+
+  <!-- ▼ Firefoxアイコンをfaviconとして設定 ▼ -->
+  <link rel="icon" type="image/png" href="firefox-icon.png" />
+
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      text-align: center;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .mode,
+    .score {
+      font-size: 1.1rem;
+      margin: 0.5rem 0;
+    }
+
+    .problem {
+      font-size: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    input[type="text"] {
+      font-size: 1.2rem;
+      width: 6rem;
+      text-align: center;
+      margin-top: 0.5rem;
+      padding: 0.3rem;
+    }
+
+    .buttons {
+      margin-top: 1rem;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      margin: 0.3rem;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #888;
+      background-color: #fff;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #e0e0e0;
+    }
+
+    .explanation {
+      margin-top: 2rem;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 1rem;
+      display: none;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ▼ テンキー ▼ */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      max-width: 200px;
+      margin: 1rem auto;
+    }
+
+    .key {
+      background-color: #fff;
+      font-size: 1.4rem;
+      padding: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .key:hover {
+      background-color: #f0f0f0;
+    }
+
+    .key.clear {
+      background-color: #ffcaca;
+    }
+
+    .key.del {
+      background-color: #ffe79f;
+    }
+
+    @media (max-width: 500px) {
+      body {
+        padding: 1rem;
+      }
+      input[type="text"] {
+        width: 5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>三口の計算アプリ（ローカル版）</h1>
+  <h2>三口の計算チャレンジ（ローカル版）</h2>
+
+  <div class="mode">現在のモード: <strong>簡単モード</strong></div>
+  <div class="score">正解回数: <span id="score">0</span> 回</div>
+
+  <div class="problem">
+    <span id="a">0</span> + <span id="b">0</span> + <span id="c">0</span> = ?
+  </div>
+
+  <input type="text" id="answer" placeholder="答えを入力" readonly />
+
+  <!-- ▼ 画面上テンキー ▼ -->
+  <div class="keypad">
+    <button class="key">1</button>
+    <button class="key">2</button>
+    <button class="key">3</button>
+    <button class="key">4</button>
+    <button class="key">5</button>
+    <button class="key">6</button>
+    <button class="key">7</button>
+    <button class="key">8</button>
+    <button class="key">9</button>
+    <button class="key clear">C</button>
+    <button class="key">0</button>
+    <button class="key del">←</button>
+  </div>
+
+  <div class="buttons">
+    <button id="check">答え合わせ</button>
+    <button id="showHint">✨ 解説をみる</button>
+    <button id="next">次の問題</button>
+    <button id="reset">記録をリセット</button>
+  </div>
+
+  <div class="explanation" id="explanation">
+    🧠 解説:<br />
+    簡単モード (1〜9)
+  </div>
+
+  <script>
+    const scoreEl = document.getElementById("score");
+    const aEl = document.getElementById("a");
+    const bEl = document.getElementById("b");
+    const cEl = document.getElementById("c");
+    const answerEl = document.getElementById("answer");
+    const resultEl = document.getElementById("explanation");
+
+    let score = 0;
+    let a = 0,
+      b = 0,
+      c = 0;
+
+    function randomNumber() {
+      return Math.floor(Math.random() * 9) + 1;
+    }
+
+    function nextProblem() {
+      a = randomNumber();
+      b = randomNumber();
+      c = randomNumber();
+      aEl.textContent = a;
+      bEl.textContent = b;
+      cEl.textContent = c;
+      answerEl.value = "";
+      resultEl.style.display = "none";
+    }
+
+    function checkAnswer() {
+      const val = parseInt(answerEl.value, 10);
+      if (val === a + b + c) {
+        alert("正解です！");
+        score++;
+        scoreEl.textContent = score;
+      } else {
+        alert("残念！もう一度挑戦してみてください。");
+      }
+    }
+
+    function resetScore() {
+      score = 0;
+      scoreEl.textContent = score;
+    }
+
+    document.getElementById("check").addEventListener("click", checkAnswer);
+    document.getElementById("next").addEventListener("click", nextProblem);
+    document.getElementById("reset").addEventListener("click", resetScore);
+    document.getElementById("showHint").addEventListener("click", () => {
+      resultEl.style.display = "block";
+    });
+
+    // ▼ テンキー機能 ▼
+    const keys = document.querySelectorAll(".key");
+    keys.forEach((key) => {
+      key.addEventListener("click", () => {
+        const val = key.textContent;
+        if (key.classList.contains("clear")) {
+          answerEl.value = "";
+        } else if (key.classList.contains("del")) {
+          answerEl.value = answerEl.value.slice(0, -1);
+        } else {
+          answerEl.value += val;
+        }
+      });
+    });
+
+    nextProblem();
+  </script>
+</body>
+</html>
